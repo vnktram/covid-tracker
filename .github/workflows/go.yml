@@ -32,3 +32,8 @@ jobs:
 
     - name: Run
       run: go run main.go
+      env: 
+        consumer-key: ${{ secrets.CONSUMER_KEY }}
+        consumer-secret: ${{ secrets.CONSUMER_SECRET }}
+        access-token: ${{ secrets.ACCESS_TOKEN }}
+        access-secret: ${{ secrets.ACCESS_SECRET }}
