@@ -33,7 +33,7 @@ func main() {
 	consumerSecret := os.Getenv("consumer-secret")
 	accessToken := os.Getenv("access-token")
 	accessSecret := os.Getenv("access-secret")
-	fmt.Println("Hello world")
+
 	fmt.Println("Triggered GH action")
 	timeout := 1000 * time.Millisecond
 	client := httpclient.NewClient(httpclient.WithHTTPTimeout(timeout))
@@ -49,7 +49,6 @@ func main() {
 
 	data := make(map[string]interface{})
 	err = json.Unmarshal(body, &data)
-	fmt.Println(string(body)[:100])
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -60,7 +59,7 @@ func main() {
 	for k, v := range currentData {
 		cd[k] = v.(string)
 	}
-	fmt.Printf("\n\n %+v \n", cd["totalconfirmed"])
+	tweetString := fmt.Sprintf("Today's confirmed cases: %s\nToday's recoveries: %s\nDeceased today: %s\nTotal Confirmed cases: %s\nTotal recoveries: %s\nTotal casualties:%s", cd["dailyconfirmed"], cd["dailyrecovered"], cd["dailydeceased"], cd["totalconfirmed"], cd["totalrecovered"], cd["totaldeceased"])
 
 	config := oauth1.NewConfig(consumerKey, consumerSecret)
 	token := oauth1.NewToken(accessToken, accessSecret)
@@ -84,6 +83,7 @@ func main() {
 	// })
 
 	// Send a Tweet
-	_, _, err = twitterClient.Statuses.Update("just setting up my twttr", nil)
-	fmt.Println(err)
+	_, _, err = twitterClient.Statuses.Update(tweetString, nil)
+	fmt.Println(tweetString)
+	fmt.Println(len(tweetString))
 }
