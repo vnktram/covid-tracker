@@ -2,12 +2,13 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"time"
 
 	"github.com/dghubble/go-twitter/twitter"
+	"github.com/dghubble/oauth1"
 	"github.com/gojektech/heimdall/v6/httpclient"
 )
 
@@ -28,11 +29,10 @@ type Stats struct {
 
 func main() {
 
-	flags := flag.NewFlagSet("user-auth", flag.ExitOnError)
-	consumerKey := flags.String("consumer-key", "", "Twitter Consumer Key")
-	consumerSecret := flags.String("consumer-secret", "", "Twitter Consumer Secret")
-	accessToken := flags.String("access-token", "", "Twitter Access Token")
-	accessSecret := flags.String("access-secret", "", "Twitter Access Secret")
+	consumerKey := os.Getenv("consumer-key")
+	consumerSecret := os.Getenv("consumer-secret")
+	accessToken := os.Getenv("access-token")
+	accessSecret := os.Getenv("access-secret")
 	fmt.Println("Hello world")
 	fmt.Println("Triggered GH action")
 	timeout := 1000 * time.Millisecond
@@ -62,28 +62,28 @@ func main() {
 	}
 	fmt.Printf("\n\n %+v \n", cd["totalconfirmed"])
 
-	config := oauth1.NewConfig(*consumerKey, *consumerSecret)
-	token := oauth1.NewToken(*accessToken, *accessSecret)
+	config := oauth1.NewConfig(consumerKey, consumerSecret)
+	token := oauth1.NewToken(accessToken, accessSecret)
 	// OAuth1 http.Client will automatically authorize Requests
 	httpClient := config.Client(oauth1.NoContext, token)
 
 	// Twitter client
-	client := twitter.NewClient(httpClient)
+	twitterClient := twitter.NewClient(httpClient)
 
 	// Verify Credentials
 	verifyParams := &twitter.AccountVerifyParams{
 		SkipStatus:   twitter.Bool(true),
 		IncludeEmail: twitter.Bool(true),
 	}
-	user, _, _ := client.Accounts.VerifyCredentials(verifyParams)
+	user, _, _ := twitterClient.Accounts.VerifyCredentials(verifyParams)
 	fmt.Printf("User's ACCOUNT:\n%+v\n", user)
 
 	// Home Timeline
-	tweets, resp, err := client.Timelines.HomeTimeline(&twitter.HomeTimelineParams{
-		Count: 20,
-	})
+	// tweets, resp, err := twitterClient.Timelines.HomeTimeline(&twitter.HomeTimelineParams{
+	// 	Count: 20,
+	// })
 
 	// Send a Tweet
-	tweet, resp, err := client.Statuses.Update("just setting up my twttr", nil)
-
+	_, _, err = twitterClient.Statuses.Update("just setting up my twttr", nil)
+	fmt.Println(err)
 }
